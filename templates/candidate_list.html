@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Recruiter AI - Candidates</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#1173d4",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101922",
+          },
+          fontFamily: {
+            "display": ["Inter"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+  </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200">
+<div class="flex h-screen">
+<div class="flex-1 flex flex-col overflow-hidden">
+<header class="bg-background-light dark:bg-background-dark border-b border-gray-200 dark:border-gray-700">
+<div class="px-6 py-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary" onclick="window.history.back()">
+<span class="material-symbols-outlined">arrow_back</span>
+                Back to Dashboard
+              </button>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 text-gray-600 dark:text-gray-400">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCGj9Tm4l0ii60SpSjptd8FaKXQFwKodniORzUBCRaLTy_0mdSGLQM4PeNxCvqraNuxSRyV-8rjXgVKeLDsu9GQjA-vF_1U8h0y6XRoIaW-6QhuTRNfZoA94lGNVYnhmK8mAuepkbPqtTOqJiQYHN4Lk7Q60GOOTp1BBjHhLf0Zo4ExmmsEUqygasUSmEgBk0BLTdHW5KJilk1ECCh1PuUIqZZqlx9WlpKbWBP9b5PjDTNmslA59MuNl1jw2-tJ43fH-LbWlgTiHkg");'></div>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-x-hidden overflow-y-auto bg-background-light dark:bg-background-dark p-6">
+<div class="container mx-auto">
+<div class="flex justify-between items-center mb-6">
+<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Candidates</h1>
+<a href="{% url 'add_candidate' %}" class="bg-primary text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-primary/90 flex items-center gap-2">
+    <span class="material-symbols-outlined">add</span>
+    Add Candidate
+</a>
+</div>
+<div class="mb-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">search</span>
+<input class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-background-light dark:bg-background-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Search candidates by name, skill, email, or job ID…" type="text"/>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 shadow-md rounded-xl overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+<thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700">
+<tr>
+<th class="px-6 py-3" scope="col">Candidate Name</th>
+<th class="px-6 py-3" scope="col">Email / Contact</th>
+<th class="px-6 py-3" scope="col">Skills</th>
+<th class="px-6 py-3" scope="col">Location</th>
+<th class="px-6 py-3" scope="col">Visa Status</th>
+<th class="px-6 py-3" scope="col">Experience</th>
+<th class="px-6 py-3 text-center" scope="col">Actions</th>
+</tr>
+</thead>
+<tbody>
+{% for candidate in candidates %}
+<tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
+    <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ candidate.name }}</td>
+    <td class="px-6 py-4">
+        {{ candidate.email }}<br>
+        <span class="text-xs text-gray-400">{{ candidate.phone }}</span>
+    </td>
+    <td class="px-6 py-4">
+        {% if candidate.skills %}
+            {{ candidate.skills|join:", " }}
+        {% else %}
+            None
+        {% endif %}
+    </td>
+    <td class="px-6 py-4">{{ candidate.location }}</td>
+    <td class="px-6 py-4">{{ candidate.visa_status }}</td>
+    <td class="px-6 py-4">{{ candidate.experience_years }} yrs</td>
+    <td class="px-6 py-4 text-center">
+        <button class="text-primary hover:text-primary/80 mx-1"><span class="material-symbols-outlined text-base">visibility</span></button>
+        <button class="text-primary hover:text-primary/80 mx-1"><span class="material-symbols-outlined text-base">edit</span></button>
+        <button class="text-red-500 hover:text-red-700 mx-1"><span class="material-symbols-outlined text-base">delete</span></button>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="7" class="text-center text-gray-500 py-4">No candidates found.</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700">
+<span class="text-sm text-gray-700 dark:text-gray-400">
+                Showing <span class="font-semibold text-gray-900 dark:text-white">1</span> to <span class="font-semibold text-gray-900 dark:text-white">5</span> of <span class="font-semibold text-gray-900 dark:text-white">100</span> Entries
+              </span>
+<div class="inline-flex -space-x-px rounded-lg text-sm">
+<a class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">Previous</a>
+<a class="flex items-center justify-center px-3 h-8 text-primary border border-gray-300 bg-primary/10 hover:bg-primary/20 dark:border-gray-700 dark:bg-gray-700 dark:text-white" href="#">1</a>
+<a class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">2</a>
+<a class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">Next</a>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+    <link rel="stylesheet" as="style" href="https://fonts.googleapis.com/css2?display=swap&family=Inter%3Awght%40400%3B500%3B700%3B900&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" />
+    <title>Recruiter AI - Candidate Intake</title>
+    <link rel="icon" href="data:image/x-icon;base64," type="image/x-icon" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1173d4",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              display: ["Inter"],
+            },
+            borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="font-display">
+    <!-- Main background -->
+    <div class="flex min-h-screen w-full bg-background-light text-slate-800 dark:bg-background-dark dark:text-slate-200">
+      <!-- Main content area without sidebar -->
+      <div class="flex flex-1 flex-col">
+        <!-- Header is removed for popup version -->
+        <!-- Main content area -->
+        <main class="flex-1 overflow-y-auto p-8">
+          <!-- Empty main content as this is just a popup -->
+        </main>
+      </div>
+    </div>
+
+    <!-- Popup modal overlay -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div class="relative w-full max-w-6xl rounded-xl bg-background-light dark:bg-background-dark">
+        <!-- Close button -->
+        <div class="absolute right-4 top-4">
+          <button class="flex size-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:bg-slate-800/60" onclick="closeModal()">
+            <span class="material-symbols-outlined"> close </span>
+          </button>
+        </div>
+        
+        <!-- Modal content -->
+        <div class="max-h-[90vh] overflow-y-auto p-8">
+          <div class="mx-auto">
+            <h1 class="mb-8 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Candidate Intake Form</h1>
+            
+            <!-- Resume Import Section -->
+            <div class="mb-6 p-4 border border-gray-200 rounded-lg">
+              <h3 class="text-lg font-semibold text-gray-700 mb-2">Import Resume</h3>
+              <p class="text-gray-600 mb-3">Upload a resume to automatically extract candidate information</p>
+              <form id="resume-parse-form" enctype="multipart/form-data">
+                <div class="flex items-center space-x-2">
+                  <input type="file" id="resume-file" name="resume" accept=".pdf,.docx" class="flex-1">
+                  <button type="button" onclick="parseResume()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
+                    Parse Resume
+                  </button>
+                </div>
+              </form>
+              
+              <!-- Parsed Resume Display -->
+              <div id="parsed-resume-section" class="mt-4 hidden">
+                <h4 class="text-md font-semibold text-gray-700 mb-2">Parsed Resume Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 class="font-medium text-gray-700">Experience</h5>
+                    <p id="parsed-experience" class="text-gray-600"></p>
+                  </div>
+                  <div>
+                    <h5 class="font-medium text-gray-700">Top Skills</h5>
+                    <p id="parsed-skills" class="text-gray-600"></p>
+                  </div>
+                  <div>
+                    <h5 class="font-medium text-gray-700">Education</h5>
+                    <p id="parsed-education" class="text-gray-600"></p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <h5 class="font-medium text-gray-700">Summary</h5>
+                  <p id="parsed-summary" class="text-gray-600"></p>
+                </div>
+                <button onclick="autoFillForm()" class="mt-3 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors">
+                  Auto-fill Form with Parsed Data
+                </button>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <div class="space-y-6">
+                <div class="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                  <h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Upload Resume</h2>
+                  <div class="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 text-center hover:border-primary hover:bg-primary/5 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-primary dark:hover:bg-primary/10">
+                    <span class="material-symbols-outlined text-4xl text-slate-400 dark:text-slate-600"> upload_file </span>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Drag & drop or <span class="font-semibold text-primary">click to upload</span></p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">PDF, DOCX up to 10MB</p>
+                  </div>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                  <h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Manual Entry</h2>
+                  <div class="space-y-4">
+                    <form id="candidate-form" method="POST" action="{% url 'add_candidate' %}" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300" for="name-modal">Name</label>
+                        <input class="form-input w-full rounded-lg border-slate-300 bg-transparent text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500" id="name-modal" name="name" placeholder="Enter candidate's full name" required />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300" for="email-modal">Email</label>
+                        <input class="form-input w-full rounded-lg border-slate-300 bg-transparent text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500" id="email-modal" name="email" placeholder="Enter candidate's email address" type="email" required />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300" for="phone-modal">Phone</label>
+                        <input class="form-input w-full rounded-lg border-slate-300 bg-transparent text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500" id="phone-modal" name="phone" placeholder="Enter candidate's phone number" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300" for="location-modal">Location</label>
+                        <input class="form-input w-full rounded-lg border-slate-300 bg-transparent text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500" id="location-modal" name="location" placeholder="Enter candidate's location" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300" for="visa-status-modal">Visa Status</label>
+                        <input class="form-input w-full rounded-lg border-slate-300 bg-transparent text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500" id="visa-status-modal" name="visa_status" placeholder="Enter candidate's visa status" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300" for="experience-modal">Years of Experience</label>
+                        <input class="form-input w-full rounded-lg border-slate-300 bg-transparent text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500" id="experience-modal" name="experience_years" placeholder="Enter years of experience" type="number" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300" for="skills-modal">Skills (comma separated)</label>
+                        <textarea class="form-textarea w-full rounded-lg border-slate-300 bg-transparent text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500" id="skills-modal" name="skills" placeholder="e.g., Java, Python, Communication" rows="3"></textarea>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300" for="resume-modal">Resume</label>
+                        <input class="form-input w-full rounded-lg border-slate-300 bg-transparent text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-primary dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500" id="resume-modal" name="resume" type="file" />
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-6">
+                <div class="rounded-lg border border-dashed border-amber-400 bg-amber-50 p-6 dark:border-amber-600/70 dark:bg-amber-900/20">
+                  <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-3xl text-amber-500"> auto_awesome </span>
+                    <div>
+                      <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Parsed Resume Features</h2>
+                      <p class="text-sm text-slate-600 dark:text-slate-400">Features extracted by AI. Review and edit as needed.</p>
+                    </div>
+                  </div>
+                  <div class="mt-6 space-y-4 border-t border-amber-200 pt-6 dark:border-amber-800/50">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Experience</p>
+                      <p class="text-sm font-semibold text-slate-800 dark:text-white" id="display-experience">5 Years</p>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Top Skills</p>
+                      <div class="flex flex-wrap justify-end gap-2" id="display-skills">
+                        <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm text-primary dark:bg-primary/20">React</span>
+                        <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm text-primary dark:bg-primary/20">Node.js</span>
+                        <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm text-primary dark:bg-primary/20">TypeScript</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Education</p>
+                      <p class="text-sm text-slate-800 dark:text-white" id="display-education">B.S. in Computer Science</p>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Status</p>
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300">
+                        <span class="size-1.5 rounded-full bg-emerald-500"></span>
+                        Active
+                      </span>
+                    </div>
+                  </div>
+                  <div class="mt-4 text-center">
+                    <button class="text-sm font-semibold text-primary hover:underline">Correct Parsed Data</button>
+                  </div>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                  <h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Parsed Resume Features</h2>
+                  <div class="flex flex-col items-center justify-center space-y-2 py-8 text-center" id="no-resume-message">
+                    <span class="material-symbols-outlined text-5xl text-slate-400 dark:text-slate-600"> description </span>
+                    <p class="text-slate-600 dark:text-slate-400">No resume uploaded yet.</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-500">Upload a resume to view parsed features.</p>
+                  </div>
+                  <div class="hidden" id="resume-data-display">
+                    <div class="space-y-4">
+                      <div>
+                        <h3 class="text-sm font-medium text-slate-600 dark:text-slate-300">Experience</h3>
+                        <p class="text-sm text-slate-800 dark:text-white" id="resume-experience-display">Not found</p>
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-medium text-slate-600 dark:text-slate-300">Top Skills</h3>
+                        <p class="text-sm text-slate-800 dark:text-white" id="resume-skills-display">Not found</p>
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-medium text-slate-600 dark:text-slate-300">Education</h3>
+                        <p class="text-sm text-slate-800 dark:text-white" id="resume-education-display">Not found</p>
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-medium text-slate-600 dark:text-slate-300">Summary</h3>
+                        <p class="text-sm text-slate-800 dark:text-white" id="resume-summary-display">Not found</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-8 flex justify-end border-t border-slate-200 pt-6 dark:border-slate-800">
+              <button class="flex min-w-[120px] items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background-dark" form="candidate-form" type="submit">Save Candidate</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Store parsed data for auto-filling
+      let parsedData = {};
+      
+      function closeModal() {
+        // Redirect to dashboard when closing the modal
+        window.location.href = "{% url 'dashboard' %}";
+      }
+      
+      function parseResume() {
+        const fileInput = document.getElementById('resume-file');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+          alert('Please select a resume file to parse.');
+          return;
+        }
+        
+        // Check file type
+        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!allowedTypes.includes(file.type)) {
+          alert('Please upload a PDF or DOCX file.');
+          return;
+        }
+        
+        // Create FormData object
+        const formData = new FormData();
+        formData.append('resume', file);
+        
+        // Send request to backend
+        fetch('{% url "parse_resume" %}', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Store parsed data
+            parsedData = data.data;
+            
+            // Display parsed information in the first section (import resume section)
+            document.getElementById('parsed-experience').textContent = parsedData.experience_years ? 
+              parsedData.experience_years + ' Years' : 'Not found';
+            
+            document.getElementById('parsed-skills').textContent = parsedData.skills ? 
+              parsedData.skills.join(', ') : 'Not found';
+            
+            document.getElementById('parsed-education').textContent = parsedData.education || 'Not found';
+            document.getElementById('parsed-summary').textContent = parsedData.summary || 'Not found';
+            
+            // Show parsed resume section
+            document.getElementById('parsed-resume-section').classList.remove('hidden');
+            
+            // Display parsed information in the amber "Parsed Resume Features" section (first right-side section)
+            document.getElementById('display-experience').textContent = parsedData.experience_years ? 
+              parsedData.experience_years + ' Years' : 'Not found';
+            
+            // Update skills display in amber section
+            const skillsContainer = document.getElementById('display-skills');
+            skillsContainer.innerHTML = '';
+            
+            if (parsedData.skills && parsedData.skills.length > 0) {
+              // Display up to 3 skills
+              const skillsToShow = parsedData.skills.slice(0, 3);
+              skillsToShow.forEach(skill => {
+                const skillSpan = document.createElement('span');
+                skillSpan.className = 'rounded-full bg-primary/10 px-2.5 py-0.5 text-sm text-primary dark:bg-primary/20';
+                skillSpan.textContent = skill;
+                skillsContainer.appendChild(skillSpan);
+              });
+            } else {
+              // If no skills found, show a message
+              const noSkillsSpan = document.createElement('span');
+              noSkillsSpan.className = 'text-sm text-slate-600 dark:text-slate-400';
+              noSkillsSpan.textContent = 'Not found';
+              skillsContainer.appendChild(noSkillsSpan);
+            }
+            
+            document.getElementById('display-education').textContent = parsedData.education || 'Not found';
+            
+            // Display parsed information in the second right-side section (with description icon)
+            document.getElementById('resume-experience-display').textContent = parsedData.experience_years ? 
+              parsedData.experience_years + ' Years' : 'Not found';
+              
+            document.getElementById('resume-skills-display').textContent = parsedData.skills ? 
+              parsedData.skills.join(', ') : 'Not found';
+              
+            document.getElementById('resume-education-display').textContent = parsedData.education || 'Not found';
+            document.getElementById('resume-summary-display').textContent = parsedData.summary || 'Not found';
+            
+            // Hide the "no resume" message and show the parsed data display
+            document.getElementById('no-resume-message').classList.add('hidden');
+            document.getElementById('resume-data-display').classList.remove('hidden');
+          } else {
+            alert('Error parsing resume: ' + data.error);
+          }
+        })
+        .catch(error => {
+          alert('Error parsing resume: ' + error.message);
+        });
+      }
+      
+      function autoFillForm() {
+        // Fill form fields with parsed data
+        if (parsedData.name) {
+          document.getElementById('name-modal').value = parsedData.name;
+        }
+        
+        if (parsedData.email) {
+          document.getElementById('email-modal').value = parsedData.email;
+        }
+        
+        if (parsedData.phone) {
+          document.getElementById('phone-modal').value = parsedData.phone;
+        }
+        
+        if (parsedData.experience_years) {
+          document.getElementById('experience-modal').value = parsedData.experience_years;
+        }
+        
+        if (parsedData.skills) {
+          document.getElementById('skills-modal').value = parsedData.skills.join(', ');
+        }
+        
+        // Show success message
+        alert('Form auto-filled with parsed resume data!');
+      }
+    </script>
+  </body>
+</html>
